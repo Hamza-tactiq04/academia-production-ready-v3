@@ -35,7 +35,7 @@ jobs:
 
       - name: Prebuild & Build APK
         run: |
-          npx expo prebuild --platform android --clean --yes
+          npx expo prebuild --platform android --clean --non-interactive
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
