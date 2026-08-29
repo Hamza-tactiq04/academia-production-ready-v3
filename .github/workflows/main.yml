@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -d "academia_work" ]; then cd academia_work; fi
-         npm install --legacy-peer-deps
+          npm install --legacy-peer-deps
 
       - name: Build Android APK
         run: |
