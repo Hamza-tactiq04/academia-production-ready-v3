@@ -1,0 +1,83 @@
+name: Build Academia Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: 'HTTPS URL of the deployed Academia backend (leave empty to use ACADEMIA_SERVER_URL secret)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ACADEMIA_SERVER_URL: ${{ inputs.server_url || secrets.ACADEMIA_SERVER_URL }}
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install web dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Project preflight
+        run: npm run preflight
+
+      - name: Static type check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test -- --run
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Verify deployed backend
+        run: |
+          test -n "$ACADEMIA_SERVER_URL" || { echo 'Missing ACADEMIA_SERVER_URL'; exit 1; }
+          echo "$ACADEMIA_SERVER_URL" | grep -E '^https://' >/dev/null || { echo 'Backend URL must use HTTPS'; exit 1; }
+          curl --fail --silent --show-error --max-time 20 "$ACADEMIA_SERVER_URL/api/health" | tee health.json
+
+      - name: Install Capacitor dependencies
+        working-directory: platforms/mobile
+        run: npm install --no-audit --no-fund
+
+      - name: Add Android platform
+        working-directory: platforms/mobile
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        working-directory: platforms/mobile
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: platforms/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: academia-android-debug
+          path: platforms/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

@@ -1,0 +1,26 @@
+name: Academia backend smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: 'HTTPS URL of the deployed Academia backend'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate HTTPS URL
+        env:
+          URL: ${{ inputs.server_url }}
+        run: |
+          echo "$URL" | grep -E '^https://' >/dev/null || { echo 'URL must use HTTPS'; exit 1; }
+      - name: Health check
+        env:
+          URL: ${{ inputs.server_url }}
+        run: curl --fail --silent --show-error --max-time 20 "$URL/api/health"

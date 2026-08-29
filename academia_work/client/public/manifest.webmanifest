@@ -1,0 +1,17 @@
+{
+  "name": "Academia | منصة الأكاديمية الرياضية",
+  "short_name": "Academia",
+  "description": "منصة احترافية لإدارة الأكاديمية الرياضية وتطوير اللاعبين",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f6ef",
+  "theme_color": "#103b37",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/academia-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/academia-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

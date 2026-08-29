@@ -1,0 +1,10 @@
+node_modules
+.git
+.github
+.env*
+*.log
+coverage
+dist
+platforms/mobile/android
+platforms/mobile/ios
+platforms/desktop/node_modules

@@ -1,0 +1,29 @@
+name: Build Academia Desktop
+
+on:
+  workflow_dispatch:
+
+jobs:
+  desktop:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install desktop dependencies
+        working-directory: platforms/desktop
+        run: npm install
+      - name: Package desktop app
+        working-directory: platforms/desktop
+        env:
+          ACADEMIA_SERVER_URL: ${{ secrets.ACADEMIA_SERVER_URL }}
+        run: npm run make
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: academia-desktop-${{ matrix.os }}
+          path: platforms/desktop/out/make/**
